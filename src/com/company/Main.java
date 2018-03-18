@@ -19,9 +19,13 @@ public class Main {
 
 
             int k = Integer.parseInt(args[1]);
-             files = new ArrayList<File>(k);
-            WrappedArray wrappedArray = new WrappedArray(k);
-//            Files.re
+            //Find how
+            System.out.println(infile.length());
+            int bytesPerK = (int) infile.length() / k;
+
+            //List of fdi
+            files = new ArrayList<File>();
+            WrappedArray wrappedArray = new WrappedArray(bytesPerK);
             try {
 
                FileInputStream in =  new FileInputStream(infile);
@@ -30,13 +34,18 @@ public class Main {
                 files.add(tempFile);
                 OutputStream os = new BufferedOutputStream(new FileOutputStream(tempFile));
 
-                int bufferIndex = 0;
+                //Splits into runs based on predetermined runs or the length, whatever comes first. Using EOT for delimiter between runs
+                StringBuffer temp = new StringBuffer();
                 while ((chr = in.read())  != -1){
-                    if(chr == '\4' || wrappedArray.isFull()){//Delimited
+                    //If we reach a new run or
+                    if(chr == '\4' || wrappedArray.wouldOverflow(temp.length())){//Delimited
                         wrappedArray.quickSort();
 
                         //Write to file
-                        os.write(wrappedArray.toInner(),0, wrappedArray.size());
+                        for (String s: wrappedArray.toInner()) {
+                            os.write(s.getBytes(), 0, s.length());
+                        }
+//                        os.write(wrappedArray.toInner(),0, wrappedArray.size());
                         os.flush();
                         os.close();
                         //Iterate counter
@@ -45,15 +54,21 @@ public class Main {
                         tempFile = File.createTempFile(tempFileName,  ".runs");
                         files.add(tempFile);
                         os = new BufferedOutputStream(new FileOutputStream(tempFile));
-                        wrappedArray = new WrappedArray(k);
-                        continue;
+                        wrappedArray = new WrappedArray(bytesPerK);
+                        //No need to write EOT
+//                        continue;
                     }
-                    //Read until limit
-                    wrappedArray.add((byte)chr);
-                    //Sort TODO: Quicksort
-                    //Output
+                    if(chr == 32 || chr == '\r' || chr == '\n'){
+                        wrappedArray.add(temp.toString() + (char) chr);
+                        temp = new StringBuffer();
+                    } else {
+                        temp.append((char) chr);
+                    }
+
                 }
                 //We're done
+                os.flush();
+                os.close();
                 in.close();
 
 

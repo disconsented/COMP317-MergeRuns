@@ -1,7 +1,6 @@
 package com.company;
 
 import java.io.*;
-//import java.nio.file.Files;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -37,9 +36,7 @@ public class Main {
 
 
             int k = Integer.parseInt(args[1]);
-            //Find how
             System.out.println(infile.length());
-//            int bytesPerK = (int) infile.length() / k;
             int bytesPerK = (int) infile.length();
 
             WrappedArray wrappedArray = new WrappedArray(bytesPerK);
@@ -86,66 +83,8 @@ public class Main {
                 os.flush();
                 os.close();
                 in.close();
-
-
-//                //Open 2, merge
-//                int runs = files.size();
-//                File lastFile = new File("NOFILEWASCREATED");
-//
-//                if(files.size() > k){
-//
-//                }
-//
-//                while (!files.isEmpty()){
-//                    //Poll to make sure its sorted in the right order
-//                    File f1 = files.poll();
-//                    File f2 = files.poll();
-//
-//                    //If any of those return null then we're at the end
-//                    if(f1 == null || f2 == null)
-//                        break;
-//                    runs++;
-//                    lastFile = File.createTempFile(tempFileName,  ".runs");
-//                    files.add(lastFile);
-//                    PriorityQueue<String> lineHeap = new PriorityQueue<String>();
-//
-//                    BufferedReader in1 =  new BufferedReader(new FileReader(f1));
-//                    BufferedReader in2 =  new BufferedReader(new FileReader(f2));
-//                    String output;
-//                    try{
-//                        while (in1.ready()){
-//                            lineHeap.add(in1.readLine());
-//                        }
-//                    } catch (Exception e){
-//                        //Java's error model is dumb
-//                    }
-//
-//                    try{
-//                        while (in2.ready()){
-//                            lineHeap.add(in2.readLine());
-//                        }
-//                    } catch (Exception e) {
-//                        //Java's error model is dumb
-//                    }
-//
-//
-//
-//                    BufferedOutputStream outputStream =  new BufferedOutputStream(new FileOutputStream(splitFile));
-//                    while (lineHeap.size() > 0){
-//                        outputStream.write(lineHeap.poll().getBytes());
-//                    }
-//                    outputStream.flush();
-//                    outputStream.close();
-//                    in1.close();
-//                    in2.close();
-//                }
                 mergeRuns(files, k);
                 System.out.println("done");
-//                String finalName = args[0].substring(0, args[0].lastIndexOf("."))+"sorted";
-//                System.out.println(lastFile.renameTo(new File(finalName)));
-//                System.out.println(lastFile.getAbsolutePath());
-
-
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {

@@ -10,14 +10,15 @@ import java.util.PriorityQueue;
 public class Main {
 
     public static final String tempFileName = "tempFile";
+
     public static void main(String[] args) {
 
         Comparator<File> lengthComparator = new Comparator<File>() {
             @Override
             public int compare(File file, File t1) {
-                if(file.length() > t1.length()){
+                if (file.length() > t1.length()) {
                     return 1;
-                } else if(file.length() < t1.length()){
+                } else if (file.length() < t1.length()) {
                     return -1;
                 } else {
                     return 0;
@@ -27,9 +28,9 @@ public class Main {
         };
 
         PriorityQueue<File> files = new PriorityQueue<File>(lengthComparator);
-        if(args.length == 2){
-            File infile  = new File(args[0]);
-            if(!infile.canRead()){
+        if (args.length == 2) {
+            File infile = new File(args[0]);
+            if (!infile.canRead()) {
                 System.out.println("Please input a readable file");
                 return;
             }
@@ -45,23 +46,22 @@ public class Main {
             try {
 
 
-                BufferedReader in =  new BufferedReader(new FileReader(infile));
+                BufferedReader in = new BufferedReader(new FileReader(infile));
                 String line;
-                File splitFile = File.createTempFile(tempFileName,  ".tmp");
+                File splitFile = File.createTempFile(tempFileName, ".tmp");
                 OutputStream os = new BufferedOutputStream(new FileOutputStream(splitFile));
 
                 //Splits into runs based on predetermined runs or the length, whatever comes first. Using EOT for delimiter between runs
 
 
-
-                while ((line = in.readLine())  != null){
+                while ((line = in.readLine()) != null) {
                     //If we reach a new run or
-                    if(line.contains("\4")  || wrappedArray.wouldOverflow(line.length())){//Delimited
+                    if (line.contains("\4") || wrappedArray.wouldOverflow(line.length())) {//Delimited
 
                         wrappedArray.quickSort();
 
                         //Write to file
-                        for (String s: wrappedArray.toInner()) {
+                        for (String s : wrappedArray.toInner()) {
                             os.write(s.getBytes(), 0, s.length());
                         }
 
@@ -69,16 +69,16 @@ public class Main {
                         os.close();
                         //Reset writer
                         files.add(splitFile);
-                        splitFile = File.createTempFile(tempFileName,  ".tmp");
+                        splitFile = File.createTempFile(tempFileName, ".tmp");
                         os = new BufferedOutputStream(new FileOutputStream(splitFile));
                         wrappedArray = new WrappedArray(bytesPerK);
                     }
-                    wrappedArray.add(line+"\r\n");
+                    wrappedArray.add(line + "\r\n");
 
                 }
                 //Sort and output the last one
                 wrappedArray.quickSort();
-                for (String s: wrappedArray.toInner()) {
+                for (String s : wrappedArray.toInner()) {
                     os.write(s.getBytes(), 0, s.length());
                 }
                 files.add(splitFile);
@@ -141,10 +141,9 @@ public class Main {
 //                }
                 mergeRuns(files, k);
                 System.out.println("done");
-                String finalName = args[0].substring(0, args[0].lastIndexOf("."))+"sorted";
+//                String finalName = args[0].substring(0, args[0].lastIndexOf("."))+"sorted";
 //                System.out.println(lastFile.renameTo(new File(finalName)));
 //                System.out.println(lastFile.getAbsolutePath());
-
 
 
             } catch (FileNotFoundException e) {
@@ -160,47 +159,46 @@ public class Main {
 
     }
 
-    public static void mergeRuns(PriorityQueue<File> files, int k){
-        while (files.size() > 1){
+    public static void mergeRuns(PriorityQueue<File> files, int k) {
+        int runs = 0;
+        while (files.size() > 1) {
+            runs++;
             ArrayList<PriorityQueue<String>> mergedRuns = new ArrayList<>();
             int toMerge = k > files.size() ? files.size() : k;
-            for (int i = 0; i < toMerge; i++) {
+            for (int i = 0; i <= toMerge; i++) {
                 File infile = files.poll();
                 PriorityQueue<String> minHeap = new PriorityQueue<String>();
-                try{
-                    BufferedReader in =  new BufferedReader(new FileReader(infile));
-                    while (in.ready())
-                        minHeap.add(in.readLine());
+                try {
+                    BufferedReader in = new BufferedReader(new FileReader(infile));
+                    while (in.ready()) {
+                        String line = in.readLine();
+                        if (!line.equals("\4"))
+                            minHeap.add(line);
+                    }
+
 //                    in.lines().forEach(s -> minHeap.add(s));
                     in.close();
-                } catch (IOException e){
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
                 //Just incase we get an empty file
-                if(minHeap.size() > 0)
-                mergedRuns.add(minHeap);
+                if (minHeap.size() > 0)
+                    mergedRuns.add(minHeap);
             }
             try {
                 //New merged file needs to be thrown back in the queue for later
-                File splitFile = File.createTempFile(tempFileName,  ".runs");
+                File splitFile = File.createTempFile(tempFileName + "Part", ".runs");
                 files.add(splitFile);
                 OutputStream os = new BufferedOutputStream(new FileOutputStream(splitFile));
                 //Whilst we still have files left to merge
-                String smallest = "";
-                while (mergedRuns.size() > 1){
+                String smallest = null;
+                while (mergedRuns.size() > 0) {
                     //Find the 'smallest' file
                     //Scan though once to find the smallest string
                     PriorityQueue<String> lastRun = null;
-                    for (PriorityQueue<String> run: mergedRuns) {
-                        if(smallest == null){
+                    for (PriorityQueue<String> run : mergedRuns) {
+                        if (smallest == null || run.peek().compareTo(smallest) < 0) {
                             smallest = run.peek();
-                            lastRun = run;
-                            continue;
-                        }
-                        String peek = run.peek();
-                        System.out.println(peek+":"+smallest+"("+peek.compareTo(smallest)+")");
-                        if(peek.compareTo(smallest) > 0){
-                            smallest = peek;
                             lastRun = run;
                         }
                     }
@@ -212,8 +210,8 @@ public class Main {
 
                     //If there is nothing left remove it
 
-                    if(smallest != null)
-                    os.write((smallest+"\r\n").getBytes());
+                    if (smallest != null)
+                        os.write((smallest + "\r\n").getBytes());
                     smallest = null;
                 }
                 os.flush();
@@ -227,11 +225,13 @@ public class Main {
 
         //Rename the final file
         File finalFile = files.poll();
-        String finalName = finalFile.getName().substring(0, finalFile.getName().lastIndexOf("."))+".sorted";
+        String finalName = finalFile.getName().substring(0, finalFile.getName().lastIndexOf(".")) + ".sorted";
         try {
             Files.move(finalFile.toPath(), finalFile.toPath().resolveSibling(finalName));
         } catch (IOException e) {
             e.printStackTrace();
         }
+        //TODO: Print to debug
+        System.out.println("Runs: " + runs);
     }
 }

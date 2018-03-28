@@ -37,8 +37,11 @@ public class Main {
 
             int k = Integer.parseInt(args[1]);
             System.out.println(infile.length());
+            //Set a size limit per array so we can tune how much memory we use, higher number == smaller runs
             int bytesPerK = (int) infile.length();
 
+            //Wrapped around an array so we can treat it like peusdo list, used over an ArrayList since we never want it to grow
+            //Entirely for convince
             WrappedArray wrappedArray = new WrappedArray(bytesPerK);
             try {
 
@@ -52,9 +55,10 @@ public class Main {
 
 
                 while ((line = in.readLine()) != null) {
-                    //If we reach a new run or
+                    //If we reach a new run or hit our size limit
                     if (line.contains("\4") || wrappedArray.wouldOverflow(line.length())) {//Delimited
 
+                        //Need to ensure the data is already sorted, instructions weren't clear on where it was needed to be so I implemented it here as I had already done it
                         wrappedArray.quickSort();
 
                         //Write to file
@@ -62,6 +66,7 @@ public class Main {
                             os.write(s.getBytes(), 0, s.length());
                         }
 
+                        //Close current output stream for the new one
                         os.flush();
                         os.close();
                         //Reset writer
@@ -83,6 +88,7 @@ public class Main {
                 os.flush();
                 os.close();
                 in.close();
+                //Now we actually merge it
                 mergeRuns(files, k);
                 System.out.println("done");
             } catch (FileNotFoundException e) {
@@ -99,7 +105,7 @@ public class Main {
     }
 
     public static void mergeRuns(PriorityQueue<File> files, int k) {
-        int runs = 0;
+        int runs = files.size();
         while (files.size() > 1) {
             runs++;
             ArrayList<PriorityQueue<String>> mergedRuns = new ArrayList<>();
@@ -170,7 +176,6 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //TODO: Print to debug
-        System.out.println("Runs: " + runs);
+        System.err.println("Runs: " + runs);
     }
 }

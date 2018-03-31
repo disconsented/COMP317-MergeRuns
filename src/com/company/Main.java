@@ -27,7 +27,7 @@ public class Main {
         };
 
         PriorityQueue<File> files = new PriorityQueue<File>(lengthComparator);
-        if (args.length == 2) {
+        if (args.length == 3) {
             File infile = new File(args[0]);
             if (!infile.canRead()) {
                 System.out.println("Please input a readable file");
@@ -35,7 +35,7 @@ public class Main {
             }
 
 
-            int k = Integer.parseInt(args[1]);
+            int k = Integer.parseInt(args[2]);
             System.out.println(infile.length());
             //Set a size limit per array so we can tune how much memory we use, higher number == smaller runs
             int bytesPerK = (int) infile.length();
@@ -99,7 +99,7 @@ public class Main {
 
             System.out.println(files.size());
         } else {
-            System.out.println("Please input the right parameters ([string fileName] [int runs])");
+            System.out.println("Please input the right parameters ([string fileName] -k [int runs])");
         }
 
     }
@@ -112,6 +112,9 @@ public class Main {
             int toMerge = k > files.size() ? files.size() : k;
             for (int i = 0; i <= toMerge; i++) {
                 File infile = files.poll();
+                if (infile == null){
+                    continue;
+                }
                 PriorityQueue<String> minHeap = new PriorityQueue<String>();
                 try {
                     BufferedReader in = new BufferedReader(new FileReader(infile));
